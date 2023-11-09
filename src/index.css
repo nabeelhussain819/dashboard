@@ -1,0 +1,22 @@
+/* ./src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+h1 {
+    font-size: x-large !important;
+    font-weight: 500 !important;
+  }
+  h2 {
+    font-size: large;
+  }
+p {
+    font-size: small;
+}
+  body {
+    margin: 0px !important;
+    font-family: sans-serif !important;
+  }
+  .ant-layout {
+    min-height: 984px !important;
+  }

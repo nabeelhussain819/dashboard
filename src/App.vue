@@ -1,26 +1,30 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <a-layout>
+    <NavBar />
+    <a-layout>
+      <SideBar />
+      <a-layout style="padding: 0 24px 24px">
+        <div id="app">
+          <DashboardView msg="Welcome to Your Dashboard"/>
+          <router-view />
+        </div>
+      </a-layout>
+    </a-layout>
+  </a-layout>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import DashboardView from './components/Dashboard.vue'
+import SideBar from './components/Layout/SideBar.vue'
+import NavBar from './components/Layout/NavBar.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    SideBar,
+    DashboardView,
+    NavBar
   }
 }
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>

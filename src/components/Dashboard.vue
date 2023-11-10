@@ -1,5 +1,5 @@
 <template>
-  <div class="hello p-4">
+  <div class="hello p-2">
     <h1>{{ msg }}</h1>
     <div class="flex flex-wrap gap-2 justify-center w-100 my-4">
       <a-card :bordered="false" class="w-100" hoverable>

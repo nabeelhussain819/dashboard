@@ -3,7 +3,7 @@
     <NavBar />
     <a-layout>
       <SideBar />
-      <a-layout style="padding: 0 24px 24px">
+      <a-layout style="padding: 12px 24px 24px">
         <div id="app">
           <!-- <DashboardView msg="Welcome to Your Dashboard"/> -->
           <router-view />

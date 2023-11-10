@@ -20,3 +20,30 @@ p {
   .ant-layout {
     min-height: 984px !important;
   }
+  .ant-btn-primary {
+    background-image: linear-gradient(to right, #3697e6 0%, #a95bf1 80%);
+    border: 0;
+    border-radius: 4px;
+  }
+  .ant-menu-dark {
+    background-color: transparent !important;
+  }
+  .ant-layout-sider-children {
+    background-image: linear-gradient(to right, #3697e6 0%, #a95bf1 80%) !important;
+  }
+  .ant-menu-item-selected {
+    background-color: #1a212d52 !important;
+  }
+  .ant-layout-sider-trigger {
+    background-image: linear-gradient(to right, #3897e67d 0%, #a95bf1ba 80%) !important;
+
+  }
+  .ant-layout-header {
+    background-color: white !important;
+  }
+  .ant-btn-primary:hover {
+    background-image: linear-gradient(to right, #3697e6 0%, #a95bf1 80%);
+    border: 0;
+    border-radius: 4px;
+    transform: scale(1.05);
+  }

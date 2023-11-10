@@ -1,14 +1,19 @@
 <template>
-    <div class="home">
-      <img alt="Vue logo" src="../assets/logo.png">
-    </div>
-  </template>
-  
-  <script>
-  // @ is an alias to /src
-  
-  export default {
-    name: 'ProductsView',
-  }
-  </script>
-  
+  <ListView />
+</template>
+
+<script>
+import { defineComponent } from "vue";
+import ListView from "../components/products/List.vue"
+
+
+export default defineComponent({
+  name: "ProductsView",
+  components: {
+    ListView
+  },
+
+
+});
+</script>
+

@@ -3,7 +3,7 @@
 
     <div class="flex items-center w-100 justify-between">
       <a-image
-    :width="160"
+    :width="200"
     :height="60"
     class="pt-2"
     :preview=false
@@ -21,7 +21,7 @@
         <SettingOutlined class="text-xl" />
         <div >
           <a-divider type="vertical" />
-          <a-avatar size="large" :gap="gap">
+          <a-avatar size="large" style="background-color: #3A6073" :gap="gap">
             AD
           </a-avatar>
           Admin

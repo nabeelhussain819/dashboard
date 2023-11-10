@@ -1,26 +1,23 @@
-
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import ProductsView from '../views/ProductsView.vue'
-
-Vue.use(VueRouter)
+import { createRouter, createWebHistory } from 'vue-router';
+import Home from '../pages/home.vue';
+import Products from '../pages/products.vue';
 
 const routes = [
   {
     path: '/',
-    name: 'HomeView',
-    component: () => import("../views/HomeView.vue"),
+    name: 'Home',
+    component: Home,
   },
   { 
     path: '/products', 
-    name: 'ProductsView', 
-    Component: ProductsView 
-},
-]
+    name: 'Products', 
+    component: Products  
+  },
+];
 
-const router = new VueRouter({
-  base: process.env.BASE_URL,
-  routes
-})
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+});
 
-export default router
+export default router;

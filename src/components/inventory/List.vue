@@ -1,347 +1,310 @@
 <template>
-    <a-row :gutter="16" class="py-4">
-  <a-col :span="8">
-    <a-card  :bordered="false" class="app-card">
-        <h1>Total Inventory</h1>
-      <h2>10k+</h2>
-    </a-card>
-  </a-col>
-  <a-col :span="8">
-    <a-card  :bordered="false" class="app-card-danger ">
-        <h1>Low Inventory Product</h1>
-      <h2 class="text-red-600">4</h2>
-    </a-card>
-  </a-col>
-  <a-col :span="8">
-    <a-card  :bordered="false" class="app-card-danger">
-        <h1>Restocking Products</h1>
-      <h2 class="text-red-600">4</h2>
-    </a-card>
-  </a-col>
-</a-row>
-<a-card class="w-100">
-    <div class="flex items-center justify-between pb-3">
-        <a-space>
-            <a-input placeholder="Search By Name" class="w-96" allowClear />
-            <a-button @click="changeVal">
-                <SearchOutlined />
-            </a-button>
-        </a-space>
-        <a-button type="primary" html-type="submit" class="w-52" @click="showModal">Create A Product</a-button>
-    </div>
-    <a-table :columns="columns" :row-key="record => record.login.uuid" :data-source="dataSource"
-        :pagination="pagination" :loading="loading" @change="handleTableChange" :style="tableStyle">
-        <template #bodyCell="{ column, text }">
-            <template v-if="column.dataIndex === 'picture'"><a-image :width="70" :src="text.large" /></template>
-            <template v-if="column.dataIndex === 'name'">{{ text.first }} {{ text.last }}</template>
-        </template>
-    </a-table>
-
-    <a-modal v-model:visible="visible" class="flex  justify-center items-center" style="width: 1000px"
-        :ok-button-props="{ hidden: true }" :cancel-button-props="{ hidden: true }" :on-cancel="handleOk"
-        title="Create A product">
-        <a-form class="w-100" ref="formRef" :model="formState" name="basic" :rules="rules" autocomplete="off"
-            layout="vertical" @finish="onFinish" @finishFailed="onFinishFailed">
-            <a-form-item name="profilePicture" class="w-100">
-                <a-upload-dragger action="/" :before-upload="beforeUpload" :custom-request="customRequest"
-                    v-model:value="formState.profilePicture" list-type="picture" maxCount="2"
-                    class="upload-list-inline">
-                    <p class="ant-upload-drag-icon">
-                        <InboxOutlined type="inbox" />
-                    </p>
-                    <p class="ant-upload-text">Click or drag file to this area to upload Product Image</p>
-                </a-upload-dragger>
-            </a-form-item>
-            <div class="w-100">
-                <a-form-item label="Product Name" class="w-100" name="product_name" has-feedback>
-                    <a-input v-model:value="formState.product_name" placeholder="Enter Product Name" />
-                </a-form-item>
-                <a-form-item label="Price" class="w-100" name="price" has-feedback>
-                    <a-input v-model:value="formState.price" placeholder="Enter Price" />
-                </a-form-item>
-                <a-form-item label="Inital Stock Level" class="w-100" name="level" has-feedback>
-                    <a-row>
-                        <a-col :span="14">
-                            <a-slider v-model:value="formState.level" :min="1" :max="20" :tooltip-open="true" />
-                        </a-col>
-                        <a-col :span="4">
-                            <a-input-number v-model:value="formState.level" :min="1" :max="20"
-                                style="margin-left: 16px" />
-                        </a-col>
-                    </a-row>
-                </a-form-item>
-                <a-form-item label="Description" class="w-100" name="details" has-feedback>
-                    <a-textarea v-model:value="formState.details" placeholder="Enter Description" />
-                </a-form-item>
+    <a-spin :spinning="!dataSource">
+        <h1 class="my-4">Inventory</h1>
+        <a-row :gutter="16" class="py-4">
+            <a-col :span="8">
+                <a-card :bordered="false" class="app-card">
+                    <h1>Total Inventory</h1>
+                    <h2>{{ dataSource?.length }}+</h2>
+                </a-card>
+            </a-col>
+            <a-col :span="8">
+                <a-card :bordered="false" class="app-card-danger ">
+                    <h1>Low Inventory Product</h1>
+                    <h2 class="text-red-600">{{ dataSource?.filter((data) => data?.stock < 50).length }}</h2>
+                </a-card>
+            </a-col>
+            <a-col :span="8">
+                <a-card :bordered="false" class="app-card-danger">
+                    <h1>Restocking Products</h1>
+                    <h2 class="text-red-600">{{ (dataSource?.filter((data) => data?.stock < 30).length) }}</h2>
+                </a-card>
+            </a-col>
+        </a-row>
+        <a-card class="w-100">
+            <div class="flex items-center justify-between pb-3">
+                <a-space>
+                    <a-input placeholder="Search By Name" class="w-96" @change="(e) => changeVal(e.target.value)" />
+                    <a-button @click="seachData">
+                        <SearchOutlined />
+                    </a-button>
+                </a-space>
+                <a-select ref="select" class="w-96" placeholder="Sort By:" @focus="focus" @change="handleChange">
+                    <a-select-option value="ASC">Lower Stock Level</a-select-option>
+                    <a-select-option value="DSC">Higher Stock Level</a-select-option>
+                </a-select>
             </div>
-            <a-form-item name="agreed" :wrapper-col="{ offset: 6, span: 18 }">
-                <a-checkbox v-model:checked="formState.agreed">
-                    I agree to
-                    <a-typography-text underline> terms of use </a-typography-text>
-                    and
-                    <a-typography-text underline> privacy policy </a-typography-text>
-                </a-checkbox>
-            </a-form-item>
-            <a-form-item :wrapper-col="{ offset: 6, span: 12 }">
-                <a-button type="primary" block html-type="submit">Submit</a-button>
-            </a-form-item>
-        </a-form>
-    </a-modal>
-    {{ console.log(visible) }}
-</a-card>
+            <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading"
+                @change="handleTableChange" :style="tableStyle">
+                <template #bodyCell="{ column, record }">
+                    <template v-if="column.dataIndex === 'title'">{{ record.title }}</template>
+                    <template v-if="column.dataIndex === 'level'">
+                        <a-tag color="red" v-if="record?.stock < 40" class="w-[96]">{{ record.stock }}</a-tag>
+                        <a-tag color="green" v-else>{{ record.stock }}</a-tag>
+                    </template>
+                    <template v-if="column.dataIndex === 'status'">{{ record.stock > 40 ? "good" : "need Update"
+                    }}</template>
+                    <template v-if="column.dataIndex === 'description'">{{ record.description }}</template>
+                    <template v-if="column.dataIndex === 'action'">
+                        <a @click="showModal(record)">Edit</a>
+                    </template>
+                </template>
+            </a-table>
+
+            <a-modal v-model:visible="visible" class="flex  justify-center items-center" style="width: 1000px"
+                :ok-button-props="{ hidden: true }" :cancel-button-props="{ hidden: true }" :on-cancel="handleOk"
+                title="Update Inventory">
+                <a-form class="w-100" ref="formRef" :model="updateData" name="basic" :rules="rules" autocomplete="off"
+                    layout="vertical" @finish="onFinish" @finishFailed="onFinishFailed">
+                    <div class="w-100">
+                        <a-form-item label="Name" class="w-100" name="title" has-feedback>
+                            <a-input v-model:value="updateData.title" placeholder="Enter Name" />
+                        </a-form-item>
+                        <a-form-item label="Stock Level" class="w-100" name="stock" has-feedback>
+                            <a-row>
+                                <a-col :span="14">
+                                    <a-slider v-model:value="updateData.stock" :min="1" :max="100" />
+                                </a-col>
+                                <a-col :span="4">
+                                    <a-input-number v-model:value="updateData.stock" :min="1" :max="100"
+                                        style="margin-left: 16px" />
+                                </a-col>
+                            </a-row>
+                        </a-form-item>
+                        <a-form-item label="Description" class="w-100" name="description" has-feedback>
+                            <a-textarea v-model:value="updateData.description" placeholder="Enter Description" />
+                        </a-form-item>
+                    </div>
+                    <a-form-item :wrapper-col="{ offset: 6, span: 12 }">
+                        <a-button type="primary" block html-type="submit">Submit</a-button>
+                    </a-form-item>
+                </a-form>
+            </a-modal>
+        </a-card>
+    </a-spin>
 </template>
 
 <script>
 import { onMounted } from 'vue';
 import { usePagination } from 'vue-request';
-import { SearchOutlined, InboxOutlined } from '@ant-design/icons-vue';
+import { SearchOutlined } from '@ant-design/icons-vue';
 import axios from 'axios';
 import { ref } from 'vue';
-const visible = ref(false); // Change this line
+const visible = ref(false);
+const updateData = ref({});
+let searchText = ref(null);
 import { reactive } from "vue";
-import { message } from "ant-design-vue";
+import { notification } from 'ant-design-vue';
 export default {
-name: 'UserList',
-components: {
-    SearchOutlined, InboxOutlined
-},
-setup() {
-    const columns = [
-        {
-            title: '',
-            dataIndex: 'picture',
-            width: '10%',
-        },
-        {
-            title: 'Name',
-            dataIndex: 'name',
-            sorter: true,
-            width: '20%',
-        },
-        {
-            title: 'Gender',
-            dataIndex: 'gender',
-            filters: [
-                {
-                    text: 'Male',
-                    value: 'male',
+    name: 'UserList',
+    components: {
+        SearchOutlined
+    },
+    setup() {
+        const columns = [
+            {
+                title: 'Title',
+                dataIndex: 'title',
+                width: '20%',
+            },
+            {
+                title: 'Level',
+                dataIndex: 'level',
+                width: '10%',
+            },
+            {
+                title: 'Status',
+                dataIndex: 'status',
+            },
+            {
+                title: 'Description',
+                dataIndex: 'description',
+            },
+            {
+                title: 'Action',
+                dataIndex: 'action',
+            },
+        ];
+        const { data: dataSource, run, loading, pagination } = usePagination(
+            async (params) => {
+                if (params?.search) {
+                    const response = await axios.get(`https://dummyjson.com/products/search?q=${params.search}`);
+                    if (params?.sort === "ASC") {
+                        return response.data.products.sort((a, b) => a.stock - b.stock)
+                    }
+                    return response.data.products.sort((a, b) => b.stock - a.stock)
+                }
+                const response = await axios.get(`https://dummyjson.com/products`, {
+                    params,
+                });
+                if (params?.sort === "ASC") {
+                    return response.data.products.sort((a, b) => a.stock - b.stock)
+                }
+                return response.data.products.sort((a, b) => b.stock - a.stock)
+            },
+            {
+                pagination: {
+                    currentKey: 'page',
                 },
+            }
+        );
+
+        const handleTableChange = (pagination, filters, sorter) => {
+            run({
+                page: pagination.currentKey,
+                sortField: sorter.field,
+                sortOrder: sorter.order,
+                ...filters,
+            });
+        };
+        const handleChange = (item) => {
+            run({
+                sort: item
+            });
+        }
+        onMounted(() => {
+            run();
+        });
+        const seachData = () => {
+            run({
+                search: searchText
+            });
+
+        }
+        const changeVal = (item) => {
+            searchText = item
+        }
+        const showModal = (text) => {
+            visible.value = true;
+            updateData.value = text
+        };
+
+        const handleOk = () => {
+            visible.value = false;
+        };
+        const formRef = ref();
+        const formState = reactive({
+            title: updateData.value.title,
+            stock: updateData.value.stock,
+            description: updateData.value.description,
+            agreed: true,
+        });
+        const onFinish = (values) => {
+            visible.value = false;
+            fetch('https://dummyjson.com/products/1', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(values)
+            })
+                .then(res => res.json())
+            notification["success"]({
+                message: 'Inventory Update Successfully',
+                placement: 'bottom'
+            });
+            console.log("Form values:", values);
+        };
+
+        const onFinishFailed = (errorInfo) => {
+            console.log("Form submission failed:", errorInfo);
+        };
+        let validateLevel = async () => {
+            const value = formState.level;
+            if (value < 1) {
+                return Promise.reject("Please input the Stock Level");
+            } else {
+                return Promise.resolve();
+            }
+        };
+        let validatePass2 = async () => {
+            const value = formState.details;
+            if (value === "") {
+                return Promise.reject("Please input the details");
+            } else {
+                return Promise.resolve();
+            }
+        };
+        let validateAgreed = async () => {
+            const agreed = formState.agreed;
+            if (agreed) {
+                return Promise.resolve();
+            } else return Promise.reject("Please agree to proceed");
+        };
+
+        const rules = {
+            description: [
                 {
-                    text: 'Female',
-                    value: 'female',
+                    required: true,
+                    validator: validatePass2,
+                    trigger: "change",
+                    message: "Please Enter Description",
                 },
             ],
-            width: '20%',
-        },
-        {
-            title: 'Email',
-            dataIndex: 'email',
-        },
-        {
-            title: 'Phone Number',
-            dataIndex: 'phone',
-        },
-    ];
+            title: [
+                {
+                    required: true,
+                    message: "Please Enter Name",
+                },
+                {
+                    min: 3,
+                    max: 30,
+                    message: "3-30 characters",
+                },
+            ],
+            stock: [
+                {
+                    required: true,
+                    validator: validateLevel,
+                    message: "Please Enter Initial Stock Level",
+                },
+            ],
+            agreed: [
+                {
+                    required: true,
+                    validator: validateAgreed,
+                    trigger: "change",
+                },
+            ],
+        };
 
-    const { data: dataSource, run, loading, pagination } = usePagination(
-        async (params) => {
-            const response = await axios.get('https://randomuser.me/api?noinfo?page=1&results=20', {
-                params,
-            });
-            return response.data.results || [];
-        },
-        {
-            pagination: {
-                currentKey: 'page',
-            },
-        }
-    );
-
-    const handleTableChange = (pagination, filters, sorter) => {
-        run({
-            page: pagination.currentKey,
-            sortField: sorter.field,
-            sortOrder: sorter.order,
-            ...filters,
-        });
-    };
-
-    onMounted(() => {
-        run();
-    });
-    const changeVal = () => {
-        run();
-
-    }
-    const showModal = () => {
-        console.log('asd');
-        visible.value = true; // Change this line
-    };
-
-    const handleOk = e => {
-        console.log(e);
-        visible.value = false; // Change this line
-    };
-    const formRef = ref();
-    const formState = reactive({
-        product_name: "",
-        price: 0,
-        level: 0,
-        details: "",
-        product_image: "",
-        agreed: true,
-    });
-    const beforeUpload = (file) => {
-        const isImage = file.type.startsWith("image/");
-        if (!isImage) {
-            message.error(`${file.name} is not an image file.`);
-            return false;
-        }
-        const isLt2M = file.size / 1024 / 1024 < 2;
-        if (!isLt2M) {
-            message.error(`${file.name} exceeds the 2MB size limit.`);
-            return false;
-        }
-        return true;
-    };
-
-    const customRequest = async ({ onSuccess, onError, file }) => {
-        try {
-            const response = await uploadFileToServer(file);
-            onSuccess(response, file);
-            message.success(`${file.name} file uploaded successfully`);
-        } catch (error) {
-            console.error("File upload failed:", error);
-            onError(error, file);
-            message.error(`${file.name} file upload failed`);
-        }
-    };
-
-    const uploadFileToServer = async (file) => {
-        console.log("Uploading file:", file.name);
-    };
-
-    const onFinish = (values) => {
-        console.log("Form values:", values);
-    };
-
-    const onFinishFailed = (errorInfo) => {
-        console.log("Form submission failed:", errorInfo);
-    };
-    let validatePass = async () => {
-        const value = formState.price;
-        if (value < 1) {
-            // console.log("validPass is empty")
-            return Promise.reject("Please input the price");
-        } else {
-            return Promise.resolve();
-        }
-    };
-    let validateLevel = async () => {
-        const value = formState.level;
-        if (value < 1) {
-            // console.log("validPass is empty")
-            return Promise.reject("Please input the Intial Stock Level");
-        } else {
-            return Promise.resolve();
-        }
-    };
-    let validatePass2 = async () => {
-        const value = formState.details;
-        if (value === "") {
-            return Promise.reject("Please input the details");
-        } else {
-            return Promise.resolve();
-        }
-    };
-    let validateAgreed = async () => {
-        const agreed = formState.agreed;
-        if (agreed) {
-            return Promise.resolve();
-        } else return Promise.reject("Please agree to proceed");
-    };
-
-    const rules = {
-        price: [
-            {
-                required: true,
-                validator: validatePass,
-                trigger: "change",
-                message: "Please Enter Price",
-            },
-        ],
-        details: [
-            {
-                required: true,
-                validator: validatePass2,
-                trigger: "change",
-                message: "Please Enter Description",
-            },
-        ],
-        product_name: [
-            {
-                required: true,
-                message: "Please Enter Product Name",
-            },
-            {
-                min: 3,
-                max: 30,
-                message: "3-30 characters",
-            },
-        ],
-        level: [
-            {
-                required: true,
-                validator: validateLevel,
-                message: "Please Enter Initial Stock Level",
-            },
-        ],
-        agreed: [
-            {
-                required: true,
-                validator: validateAgreed,
-                trigger: "change",
-            },
-        ],
-    };
-
-    return {
-        columns,
-        dataSource,
-        loading,
-        pagination,
-        handleTableChange,
-        showModal,
-        handleOk,
-        visible,
-        formState,
-        onFinish,
-        onFinishFailed,
-        formRef,
-        rules,
-        beforeUpload,
-        customRequest,
-        changeVal
-    };
-},
+        return {
+            columns,
+            dataSource,
+            loading,
+            pagination,
+            handleTableChange,
+            showModal,
+            handleOk,
+            visible,
+            formState,
+            onFinish,
+            onFinishFailed,
+            formRef,
+            rules,
+            changeVal,
+            updateData,
+            seachData,
+            searchText,
+            handleChange,
+        };
+    },
 };
 
 </script>
 <style>
 .ant-table {
-height: 70vh;
+    height: 58vh !important;
 }
 
 .ant-table-container {
-height: 70vh;
-overflow-y: auto;
+    height: 58vh !important;
+    overflow-y: auto;
 }
 
 .ant-modal-content {
-width: 800px;
+    width: 800px;
 }
 
 .ant-modal-footer .ant-btn-primary {
-display: none;
+    display: none;
 }
 </style>  
